@@ -63,6 +63,13 @@ spec:
         - name: S3_BUCKET_NAME
           value: "fiapx-video" # <POPULATE_FROM_TERRAFORM_OUTPUT: s3_bucket_name>
 
+        - name: NEW_RELIC_APP_NAME
+          value: "fiapx-worker"
+        - name: NEW_RELIC_LICENSE_KEY
+          value: "3b37ab2f3df2e57df99ba57f8e851b7dFFFFNRAL"
+        - name: NEW_RELIC_LOG_LEVEL
+          value: "info"
+
         resources:
           limits:
             cpu: "1000m"
