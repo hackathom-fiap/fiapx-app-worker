@@ -1,0 +1,38 @@
+name: PR de Develop para Main
+
+on:
+  push:
+    branches:
+      - 'develop'
+    
+jobs:
+  sonar_analyse: 
+    name:  Build  and  analyze Sonarqube /develop
+    runs-on:  ubuntu-latest 
+    steps:
+      - uses: actions/checkout@v4
+        with: 
+          fetch-depth:  0   # Shallow clones should be disabled for a better relevance of analysis 
+
+           
+  create_pull_request:  
+    runs-on: ubuntu-latest
+    needs: sonar_analyse     
+    permissions:
+      pull-requests: write
+      contents: write
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+        
+      - name: Criar Pull Request para develop
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: ${{ github.ref_name }}
+          destination_branch: "main"
+          pr_title: "PR aberto automaticamente: ${{ github.ref_name }} -> to main"
+          pr_body: |
+            Build da aplicação Java concluído com sucesso.
+            O PR está pronto para revisão.
+          pr_label: "automação"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
