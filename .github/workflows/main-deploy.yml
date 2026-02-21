@@ -107,7 +107,7 @@ jobs:
           NEW_TAG: ${{ needs.build-test-and-push.outputs.tag }}
         run: |
           # Replaces the image tag in the correct deployment manifest
-          sed -i "s|:latest|:$NEW_TAG|g" worker-repo/k8s/deploy.yaml
+          sed -i "s|:latest|:$NEW_TAG|g" worker-repo/k8s/deployment.yaml
 
       - name: Deploy application to EKS
         run: |
