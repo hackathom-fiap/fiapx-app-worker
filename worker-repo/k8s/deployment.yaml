@@ -16,7 +16,7 @@ spec:
       serviceAccountName: worker-service-account
       containers:
       - name: worker
-        image: 239409137076.dkr.ecr.us-east-1.amazonaws.com/worker:754da65a38fc59f6b0653f7ce73edc59c567b416
+        image: 239409137076.dkr.ecr.us-east-1.amazonaws.com/worker:latest
         imagePullPolicy: IfNotPresent
         env:
         - name: DB_HOST
