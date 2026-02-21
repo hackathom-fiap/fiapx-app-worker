@@ -16,7 +16,12 @@ from src.use_cases.process_video import ProcessVideoUseCase
 from prometheus_client import start_http_server, Counter, Histogram
 
 # Configurações
-RABBITMQ_URL = os.getenv("RABBITMQ_URL", "amqp://user:password@rabbitmq:5672/")
+MQ_USER = os.getenv("MQ_USER", "user")
+MQ_PASSWORD = os.getenv("MQ_PASSWORD", "password")
+MQ_HOST = os.getenv("MQ_HOST", "rabbitmq")
+MQ_PORT = os.getenv("MQ_PORT", "5672")
+
+RABBITMQ_URL = f"amqps://{MQ_USER}:{MQ_PASSWORD}@{MQ_HOST}:{MQ_PORT}/"
 QUEUE_NAME = "video_processing"
 SHARED_DIR = os.getenv("SHARED_DIR", "/data")
 UPLOADS_DIR = os.path.join(SHARED_DIR, "uploads")
