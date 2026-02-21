@@ -111,5 +111,7 @@ jobs:
 
       - name: Deploy application to EKS
         run: |
-          # Applies all manifests from the correct k8s directory
+          # Applies the namespace first to avoid "not found" errors
+          kubectl apply -f worker-repo/k8s/namespace.yaml
+          # Applies the rest of the manifests
           kubectl apply -f worker-repo/k8s/
