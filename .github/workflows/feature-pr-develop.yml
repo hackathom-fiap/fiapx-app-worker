@@ -22,12 +22,12 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r gateway-repo/app/requirements.txt
+          pip install -r worker-repo/app/requirements.txt
           pip install pytest pytest-cov
 
       - name: Test with Pytest
         run: |
-          export PYTHONPATH=gateway-repo/app
+          export PYTHONPATH=worker-repo/app
           pytest --cov=. --cov-report=xml:coverage.xml
 
       - name: SonarCloud Scan
