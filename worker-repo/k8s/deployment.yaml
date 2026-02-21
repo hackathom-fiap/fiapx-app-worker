@@ -16,7 +16,7 @@ spec:
       serviceAccountName: worker-service-account
       containers:
       - name: worker
-        image: fiapx-worker:latest
+        image: 239409137076.dkr.ecr.us-east-1.amazonaws.com/worker:754da65a38fc59f6b0653f7ce73edc59c567b416
         imagePullPolicy: IfNotPresent
         env:
         - name: DB_HOST
@@ -37,14 +37,11 @@ spec:
           value: "worker-db"
 
         - name: MQ_HOST
-          value: "b-9b68e9e5-262b-4659-bea6-3bef70731fa9.mq.us-east-1.on.aws" # <POPULATE_FROM_TERRAFORM_OUTPUT: broker_endpoint (hostname part)>
+          value: "b-da477231-97db-4dbc-8473-2ec479ea9dcb.mq.us-east-1.on.aws" # <POPULATE_FROM_TERRAFORM_OUTPUT: broker_endpoint (hostname part)>
         - name: MQ_PORT
           value: "5671" # <POPULATE_FROM_TERRAFORM_OUTPUT: broker_endpoint (port part)>
         - name: MQ_USER
-          valueFrom:
-            secretKeyRef:
-              name: rabbitmq-credentials
-              key: username
+          value: "user"
         - name: MQ_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -56,10 +53,7 @@ spec:
         - name: REDIS_PORT
           value: "6379" # <POPULATE_FROM_TERRAFORM_OUTPUT: redis_port>
         - name: REDIS_USER
-          valueFrom:
-            secretKeyRef:
-              name: redis-credentials
-              key: username
+          value: "default"
         - name: REDIS_PASSWORD
           valueFrom:
             secretKeyRef:
