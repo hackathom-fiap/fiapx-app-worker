@@ -36,32 +36,34 @@ class ProcessVideoUseCase:
         self.video_repo.update_status(video)
         self.videos_processed_metric.labels(status='processing').inc()
 
-        zip_local_path = None # Initialize to None for finally block cleanup
+        video_local_path = os.path.join(self.uploads_dir, filename)
+        zip_local_path = None 
         try:
-            # 2. Process Video
-            video_path = os.path.join(self.uploads_dir, filename)
-            if not os.path.exists(video_path):
-                raise FileNotFoundError(f"File {video_path} does not exist")
+            # 2. Download original video from S3
+            s3_upload_key = f"uploads/{filename}"
+            print(f"Downloading original video from S3: {self.s3_bucket_name}/{s3_upload_key}")
+            self.s3_client.download_file(self.s3_bucket_name, s3_upload_key, video_local_path)
 
-            zip_filename = self.processor.extract_frames_to_zip(video_path, self.outputs_dir)
+            # 3. Process Video
+            zip_filename = self.processor.extract_frames_to_zip(video_local_path, self.outputs_dir)
             zip_local_path = os.path.join(self.outputs_dir, zip_filename)
             
-            # 3. Upload to S3
-            s3_key = f"processed_videos/{video_id}/{zip_filename}"
-            print(f"Uploading {zip_local_path} to S3 bucket {self.s3_bucket_name} with key {s3_key}")
-            self.s3_client.upload_file(zip_local_path, self.s3_bucket_name, s3_key)
+            # 4. Upload ZIP to S3
+            s3_zip_key = f"processed_videos/{video_id}/{zip_filename}"
+            print(f"Uploading {zip_local_path} to S3 bucket {self.s3_bucket_name} with key {s3_zip_key}")
+            self.s3_client.upload_file(zip_local_path, self.s3_bucket_name, s3_zip_key)
             
-            s3_url = f"https://{self.s3_bucket_name}.s3.amazonaws.com/{s3_key}"
+            s3_url = f"https://{self.s3_bucket_name}.s3.amazonaws.com/{s3_zip_key}"
             print(f"File uploaded to S3: {s3_url}")
 
-            # 4. Update status to COMPLETED and increment metric
+            # 5. Update status to COMPLETED and increment metric
             video.status = VideoStatus.COMPLETED
             video.zip_path = s3_url # Store S3 URL instead of local path
             self.video_repo.update_status(video)
             self.videos_processed_metric.labels(status='completed').inc()
             
         except boto3.exceptions.ClientError as s3_error:
-            print(f"S3 upload error: {s3_error}")
+            print(f"S3 operation error: {s3_error}")
             video.status = VideoStatus.ERROR
             self.video_repo.update_status(video)
             self.videos_processed_metric.labels(status='error').inc()
@@ -69,7 +71,7 @@ class ProcessVideoUseCase:
             
             user_email = self.video_repo.get_user_email_by_video(video_id)
             if user_email:
-                self.notifier.notify_error(user_email, filename, f"S3 Upload Failed: {str(s3_error)}")
+                self.notifier.notify_error(user_email, filename, f"S3 Operation Failed: {str(s3_error)}")
             raise s3_error
 
         except Exception as e:
@@ -86,7 +88,10 @@ class ProcessVideoUseCase:
             
             raise e
         finally:
-            # Cleanup local ZIP file after processing/upload
+            # Cleanup local files after processing/upload
+            if video_local_path and os.path.exists(video_local_path):
+                os.remove(video_local_path)
+                print(f"Cleaned up local video file: {video_local_path}")
             if zip_local_path and os.path.exists(zip_local_path):
                 os.remove(zip_local_path)
                 print(f"Cleaned up local ZIP file: {zip_local_path}")
