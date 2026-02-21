@@ -106,14 +106,10 @@ jobs:
         env:
           NEW_TAG: ${{ needs.build-test-and-push.outputs.tag }}
         run: |
-          # This step assumes the deployment manifest is in `infra/deployment.yml`
-          # and the image tag placeholder is `TAG`. This may need adjustment.
-          sed -i "s|TAG|$NEW_TAG|g" infra/deployment.yml
+          # Replaces the image tag in the correct deployment manifest
+          sed -i "s|:latest|:$NEW_TAG|g" worker-repo/k8s/deploy.yaml
 
       - name: Deploy application to EKS
         run: |
-          # This step assumes the manifests are in the `infra` directory.
-          kubectl apply -f infra/namespace.yml
-          kubectl apply --validate=false -f infra
-          
-          echo "Deploy successful!"
+          # Applies all manifests from the correct k8s directory
+          kubectl apply -f worker-repo/k8s/
