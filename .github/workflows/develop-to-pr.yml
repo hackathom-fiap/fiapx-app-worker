@@ -32,7 +32,7 @@ jobs:
           destination_branch: "main"
           pr_title: "PR aberto automaticamente: ${{ github.ref_name }} -> to main"
           pr_body: |
-            Build da aplicação Java concluído com sucesso.
+            Build da aplicação Python e da imagem Docker concluído com sucesso.
             O PR está pronto para revisão.
           pr_label: "automação"
           github_token: ${{ secrets.GITHUB_TOKEN }}

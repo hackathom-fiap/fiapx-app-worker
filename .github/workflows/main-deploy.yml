@@ -106,7 +106,7 @@ jobs:
         env:
           NEW_TAG: ${{ needs.build-test-and-push.outputs.tag }}
         run: |
-          # Replaces the image tag in the correct deployment manifest
+          # Replaces the :latest placeholder with the dynamic build tag
           sed -i "s|:latest|:$NEW_TAG|g" worker-repo/k8s/deployment.yaml
 
       - name: Deploy application to EKS
