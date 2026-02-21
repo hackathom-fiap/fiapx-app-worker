@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-deployment
+  namespace: fiapx-worker
+spec:
+  replicas: 1 # You can increase this for parallel processing
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      serviceAccountName: worker-service-account
+      containers:
+      - name: worker
+        image: fiapx-worker:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: DB_HOST
+          value: "soat-postgres-db.cszqygoyua1z.us-east-1.rds.amazonaws.com" # <POPULATE_FROM_TERRAFORM_OUTPUT: db_instance_endpoint (hostname part)>
+        - name: DB_PORT
+          value: "5432" # <POPULATE_FROM_TERRAFORM_OUTPUT: db_instance_endpoint (port part)>
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: password
+
+        - name: MQ_HOST
+          value: "b-9b68e9e5-262b-4659-bea6-3bef70731fa9.mq.us-east-1.on.aws" # <POPULATE_FROM_TERRAFORM_OUTPUT: broker_endpoint (hostname part)>
+        - name: MQ_PORT
+          value: "5671" # <POPULATE_FROM_TERRAFORM_OUTPUT: broker_endpoint (port part)>
+        - name: MQ_USER
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-credentials
+              key: username
+        - name: MQ_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-credentials
+              key: password
+
+        - name: REDIS_HOST
+          value: "master.fiapx-redis-replication-group.jx4c0w.use1.cache.amazonaws.com" # <POPULATE_FROM_TERRAFORM_OUTPUT: redis_endpoint>
+        - name: REDIS_PORT
+          value: "6379" # <POPULATE_FROM_TERRAFORM_OUTPUT: redis_port>
+        - name: REDIS_USER
+          valueFrom:
+            secretKeyRef:
+              name: redis-credentials
+              key: username
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-credentials
+              key: password
+        
+        - name: S3_BUCKET_NAME
+          value: "fiapx-video" # <POPULATE_FROM_TERRAFORM_OUTPUT: s3_bucket_name>
+
+        resources:
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
