@@ -15,6 +15,9 @@ class OpenCVVideoProcessor(VideoProcessor):
         os.makedirs(frames_dir)
 
         cap = cv2.VideoCapture(input_path)
+        if not cap.isOpened():
+            print(f"ERROR: Could not open video file {input_path}")
+            raise IOError(f"Could not open video file {input_path}")
         fps = cap.get(cv2.CAP_PROP_FPS) or 30
         frame_interval = int(fps)
         
