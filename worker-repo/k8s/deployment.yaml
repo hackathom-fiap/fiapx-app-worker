@@ -37,18 +37,13 @@ spec:
           value: "worker-db"
 
         - name: MQ_HOST
-          value: "b-78f12bf9-83f7-46b7-bdf5-fa1f313808e8.mq.us-east-1.on.aws" # <POPULATE_FROM_TERRAFORM_OUTPUT: broker_endpoint (hostname part)>
-
+          value: "rabbitmq-test-svc.fiapx-worker.svc.cluster.local" # Host do RabbitMQ de teste no EKS
         - name: MQ_PORT
-          value: "5671" # <POPULATE_FROM_TERRAFORM_OUTPUT: broker_endpoint (port part)>
+          value: "5672" # Porta padrão do RabbitMQ
         - name: MQ_USER
-          value: "appuser"
+          value: "testuser" # Usuário do RabbitMQ de teste
         - name: MQ_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: rabbitmq-credentials
-              key: password
-
+          value: "testpassword" # Senha do RabbitMQ de teste
         - name: REDIS_HOST
           value: "master.fiapx-redis-replication-group.jx4c0w.use1.cache.amazonaws.com" # <POPULATE_FROM_TERRAFORM_OUTPUT: redis_endpoint>
         - name: REDIS_PORT

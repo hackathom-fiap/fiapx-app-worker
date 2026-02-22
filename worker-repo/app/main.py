@@ -97,40 +97,43 @@ def main():
     
     print("🎬 Video Worker connecting to RabbitMQ (Clean Arch)...")
     
-    print("--- Tracing: Parsing RABBITMQ_URL ---")
-    url_components = urlparse(RABBITMQ_URL)
-    print(f"--- Tracing: Parsed URL components - Host: {url_components.hostname}, Port: {url_components.port}, User: {url_components.username} ---")
+    print("--- Tracing: Setting up RabbitMQ connection parameters ---")
     
-    mq_user = url_components.username
-    mq_password = url_components.password
-    mq_host = url_components.hostname
-    mq_port = url_components.port if url_components.port else 5671 # Default to 5671 for amqps
-
-    print("--- Tracing: Creating SSLOptions ---")
-    
-    # Create an SSLContext object for robust TLS connection
-    context = ssl.create_default_context()
-    # Enable hostname verification and require server certificate
-    context.check_hostname = True
-    context.verify_mode = ssl.CERT_REQUIRED
-    # Load default system CA certificates to validate the server
-    context.load_default_certs()
-
-    ssl_options = pika.SSLOptions(
-        context=context
-    )
-    print("--- Tracing: SSLOptions created ---")
+    mq_user = os.getenv("MQ_USER")
+    mq_password = os.getenv("MQ_PASSWORD")
+    mq_host = os.getenv("MQ_HOST")
+    mq_port = int(os.getenv("MQ_PORT", "5671"))
 
     credentials = pika.PlainCredentials(mq_user, mq_password)
-    print("--- Tracing: PlainCredentials created ---")
     
-    connection_parameters = pika.ConnectionParameters(
-        host=mq_host,
-        port=mq_port,
-        credentials=credentials,
-        virtual_host="/", # Amazon MQ uses "/" as virtual host
-        ssl_options=ssl_options
-    )
+    if mq_host == "rabbitmq-test-svc.fiapx-worker.svc.cluster.local":
+        print("--- Tracing: Connecting to in-cluster RabbitMQ (plain AMQP) ---")
+        connection_parameters = pika.ConnectionParameters(
+            host=mq_host,
+            port=mq_port, # Should be 5672 for test service
+            credentials=credentials,
+            virtual_host="/"
+        )
+    else:
+        print("--- Tracing: Connecting to external RabbitMQ (AMQPS) ---")
+        # Create an SSLContext object for robust TLS connection
+        context = ssl.create_default_context()
+        # Enable hostname verification and require server certificate
+        context.check_hostname = True
+        context.verify_mode = ssl.CERT_REQUIRED
+        # Load default system CA certificates to validate the server
+        context.load_default_certs()
+
+        ssl_options = pika.SSLOptions(
+            context=context
+        )
+        connection_parameters = pika.ConnectionParameters(
+            host=mq_host,
+            port=mq_port,
+            credentials=credentials,
+            virtual_host="/",
+            ssl_options=ssl_options
+        )
     print("--- Tracing: ConnectionParameters created ---")
 
     while True:
