@@ -140,8 +140,8 @@ def main():
             print("--- Tracing: Channel established ---")
             break
         except pika.exceptions.AMQPConnectionError as e:
-            print(f"--- Tracing: AMQPConnectionError caught: {e} ---")
-            print(f"RabbitMQ indisponível, tentando novamente em 5s... Erro: {e}")
+            print(f"--- Tracing: AMQPConnectionError caught: {repr(e)} ---")
+            print(f"RabbitMQ indisponível, tentando novamente em 5s... Erro detalhado: {repr(e)}")
             time.sleep(5)
             
     print("--- Tracing: Connection loop exited ---")
