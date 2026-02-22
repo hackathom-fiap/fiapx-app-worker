@@ -37,7 +37,8 @@ spec:
           value: "worker-db"
 
         - name: MQ_HOST
-          value: "b-da477231-97db-4dbc-8473-2ec479ea9dcb.mq.us-east-1.on.aws" # <POPULATE_FROM_TERRAFORM_OUTPUT: broker_endpoint (hostname part)>
+          value: "b-78f12bf9-83f7-46b7-bdf5-fa1f313808e8.mq.us-east-1.on.aws" # <POPULATE_FROM_TERRAFORM_OUTPUT: broker_endpoint (hostname part)>
+
         - name: MQ_PORT
           value: "5671" # <POPULATE_FROM_TERRAFORM_OUTPUT: broker_endpoint (port part)>
         - name: MQ_USER
