@@ -1,4 +1,4 @@
-name: Worker CI/CD
+name: '[PRD] Build, Test and Deploy App to EKS'
 
 on:
   push:

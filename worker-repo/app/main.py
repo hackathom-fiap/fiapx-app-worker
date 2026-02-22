@@ -11,6 +11,7 @@ from src.adapters.video.opencv_processor import OpenCVVideoProcessor
 from src.adapters.notification.log_service import LogNotificationService
 from src.adapters.notification.ses_service import SESNotificationService
 from src.use_cases.process_video import ProcessVideoUseCase
+from urllib.parse import quote_plus # Add this import
 
 # Prometheus Metrics
 from prometheus_client import start_http_server, Counter, Histogram
@@ -19,9 +20,10 @@ from prometheus_client import start_http_server, Counter, Histogram
 MQ_USER = os.getenv("MQ_USER", "user")
 MQ_PASSWORD = os.getenv("MQ_PASSWORD", "password")
 MQ_HOST = os.getenv("MQ_HOST", "rabbitmq")
-MQ_PORT = os.getenv("MQ_PORT", "5672")
+MQ_PORT = os.getenv("MQ_PORT", "5671") # Changed default to 5671 for Amazon MQ with TLS
 
-RABBITMQ_URL = f"amqps://{MQ_USER}:{MQ_PASSWORD}@{MQ_HOST}:{MQ_PORT}/"
+encoded_mq_password = quote_plus(MQ_PASSWORD)
+RABBITMQ_URL = f"amqps://{MQ_USER}:{encoded_mq_password}@{MQ_HOST}:{MQ_PORT}/"
 QUEUE_NAME = "video_processing"
 SHARED_DIR = os.getenv("SHARED_DIR", "/data")
 UPLOADS_DIR = os.path.join(SHARED_DIR, "uploads")
