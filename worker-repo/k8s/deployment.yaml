@@ -42,7 +42,7 @@ spec:
         - name: MQ_PORT
           value: "5671" # <POPULATE_FROM_TERRAFORM_OUTPUT: broker_endpoint (port part)>
         - name: MQ_USER
-          value: "user"
+          value: "appuser"
         - name: MQ_PASSWORD
           valueFrom:
             secretKeyRef:
