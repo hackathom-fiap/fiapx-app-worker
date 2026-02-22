@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq-test
+  namespace: fiapx-worker # Use o namespace do seu worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq-test
+  template:
+    metadata:
+      labels:
+        app: rabbitmq-test
+    spec:
+      containers:
+      - name: rabbitmq
+        image: rabbitmq:3-management # Imagem RabbitMQ com plugin de gerenciamento
+        env:
+        - name: RABBITMQ_DEFAULT_USER
+          value: "testuser"
+        - name: RABBITMQ_DEFAULT_PASS
+          value: "testpassword" # Senha simples para o teste
+        ports:
+        - name: amqp
+          containerPort: 5672
+        - name: management
+          containerPort: 15672
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-test-svc
+  namespace: fiapx-worker # Use o namespace do seu worker
+spec:
+  selector:
+    app: rabbitmq-test
+  ports:
+  - name: amqp
+    protocol: TCP
+    port: 5672
+    targetPort: 5672
+  - name: management
+    protocol: TCP
+    port: 15672
+    targetPort: 15672
+  type: ClusterIP # Acessível apenas de dentro do cluster
