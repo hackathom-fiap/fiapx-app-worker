@@ -5,6 +5,7 @@ import time
 import sys
 import threading
 import boto3 # Import boto3
+import ssl # Add this import
 from database import SessionLocal
 from src.adapters.db.repositories import PostgresVideoRepository
 from src.adapters.video.opencv_processor import OpenCVVideoProcessor
@@ -12,6 +13,7 @@ from src.adapters.notification.log_service import LogNotificationService
 from src.adapters.notification.ses_service import SESNotificationService
 from src.use_cases.process_video import ProcessVideoUseCase
 from urllib.parse import quote_plus # Add this import
+from urllib.parse import urlparse # Add this import
 
 # Prometheus Metrics
 from prometheus_client import start_http_server, Counter, Histogram
@@ -95,14 +97,38 @@ def main():
     
     print("🎬 Video Worker connecting to RabbitMQ (Clean Arch)...")
     
+    # Parse RABBITMQ_URL to extract components for explicit SSLOptions
+    url_components = urlparse(RABBITMQ_URL)
+    
+    mq_user = url_components.username
+    mq_password = url_components.password
+    mq_host = url_components.hostname
+    mq_port = url_components.port if url_components.port else 5671 # Default to 5671 for amqps
+
+    # Temporarily disable certificate validation for troubleshooting (cert_reqs=ssl.CERT_NONE)
+    # For production, this should be ssl.CERT_REQUIRED with proper ca_certs configured.
+    ssl_options = pika.SSLOptions(
+        ssl_version=ssl.PROTOCOL_TLSv1_2,
+        cert_reqs=ssl.CERT_NONE 
+    )
+
+    credentials = pika.PlainCredentials(mq_user, mq_password)
+    
+    connection_parameters = pika.ConnectionParameters(
+        host=mq_host,
+        port=mq_port,
+        credentials=credentials,
+        virtual_host="/", # Amazon MQ uses "/" as virtual host
+        ssl_options=ssl_options
+    )
+
     while True:
         try:
-            params = pika.URLParameters(RABBITMQ_URL)
-            connection = pika.BlockingConnection(params)
+            connection = pika.BlockingConnection(connection_parameters)
             channel = connection.channel()
             break
-        except pika.exceptions.AMQPConnectionError:
-            print("RabbitMQ indisponível, tentando novamente em 5s...")
+        except pika.exceptions.AMQPConnectionError as e:
+            print(f"RabbitMQ indisponível, tentando novamente em 5s... Erro: {e}")
             time.sleep(5)
             
     channel.queue_declare(queue=QUEUE_NAME, durable=True)
