@@ -107,9 +107,15 @@ def main():
     mq_port = url_components.port if url_components.port else 5671 # Default to 5671 for amqps
 
     print("--- Tracing: Creating SSLOptions ---")
+    
+    # Create an SSLContext object
+    context = ssl.create_default_context()
+    context.check_hostname = False # Para cert_reqs=ssl.CERT_NONE, a verificação de hostname é desabilitada.
+                                  # Re-habilitar e configurar para produção.
+    context.verify_mode = ssl.CERT_NONE # Para teste inicial, desabilitar validação de certificado.
+
     ssl_options = pika.SSLOptions(
-        ssl_version=ssl.PROTOCOL_TLSv1_2,
-        cert_reqs=ssl.CERT_NONE 
+        context=context
     )
     print("--- Tracing: SSLOptions created ---")
 
