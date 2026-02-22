@@ -108,11 +108,13 @@ def main():
 
     print("--- Tracing: Creating SSLOptions ---")
     
-    # Create an SSLContext object
+    # Create an SSLContext object for robust TLS connection
     context = ssl.create_default_context()
-    context.check_hostname = False # Para cert_reqs=ssl.CERT_NONE, a verificação de hostname é desabilitada.
-                                  # Re-habilitar e configurar para produção.
-    context.verify_mode = ssl.CERT_NONE # Para teste inicial, desabilitar validação de certificado.
+    # Enable hostname verification and require server certificate
+    context.check_hostname = True
+    context.verify_mode = ssl.CERT_REQUIRED
+    # Load default system CA certificates to validate the server
+    context.load_default_certs()
 
     ssl_options = pika.SSLOptions(
         context=context
