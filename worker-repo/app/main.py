@@ -97,22 +97,24 @@ def main():
     
     print("🎬 Video Worker connecting to RabbitMQ (Clean Arch)...")
     
-    # Parse RABBITMQ_URL to extract components for explicit SSLOptions
+    print("--- Tracing: Parsing RABBITMQ_URL ---")
     url_components = urlparse(RABBITMQ_URL)
+    print(f"--- Tracing: Parsed URL components - Host: {url_components.hostname}, Port: {url_components.port}, User: {url_components.username} ---")
     
     mq_user = url_components.username
     mq_password = url_components.password
     mq_host = url_components.hostname
     mq_port = url_components.port if url_components.port else 5671 # Default to 5671 for amqps
 
-    # Temporarily disable certificate validation for troubleshooting (cert_reqs=ssl.CERT_NONE)
-    # For production, this should be ssl.CERT_REQUIRED with proper ca_certs configured.
+    print("--- Tracing: Creating SSLOptions ---")
     ssl_options = pika.SSLOptions(
         ssl_version=ssl.PROTOCOL_TLSv1_2,
         cert_reqs=ssl.CERT_NONE 
     )
+    print("--- Tracing: SSLOptions created ---")
 
     credentials = pika.PlainCredentials(mq_user, mq_password)
+    print("--- Tracing: PlainCredentials created ---")
     
     connection_parameters = pika.ConnectionParameters(
         host=mq_host,
@@ -121,17 +123,24 @@ def main():
         virtual_host="/", # Amazon MQ uses "/" as virtual host
         ssl_options=ssl_options
     )
+    print("--- Tracing: ConnectionParameters created ---")
 
     while True:
         try:
+            print("--- Tracing: Attempting BlockingConnection ---")
             connection = pika.BlockingConnection(connection_parameters)
+            print("--- Tracing: BlockingConnection established ---")
             channel = connection.channel()
+            print("--- Tracing: Channel established ---")
             break
         except pika.exceptions.AMQPConnectionError as e:
+            print(f"--- Tracing: AMQPConnectionError caught: {e} ---")
             print(f"RabbitMQ indisponível, tentando novamente em 5s... Erro: {e}")
             time.sleep(5)
             
+    print("--- Tracing: Connection loop exited ---")
     channel.queue_declare(queue=QUEUE_NAME, durable=True)
+    print("--- Tracing: Queue declared ---")
     channel.basic_qos(prefetch_count=1)
     
     print(' [*] Waiting for messages. To exit press CTRL+C')
