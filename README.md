@@ -1,5 +1,11 @@
 # 🏗️ Solução FIAP X - Sistema de Processamento de Vídeos
 
+## Integrantes - Grupo 250 do Hackathon FIAP
+*   Thiago Frozzi Ramos - RM363916
+*   Denise da Silva Ferreira - RM360753
+*   Humberto Moura Feitoza - RM360753
+
+
 Esta documentação descreve a arquitetura completa da solução desenvolvida para o **Hackathon FIAP X**. O sistema foi projetado seguindo os princípios de microsserviços, orientação a eventos e escalabilidade em nuvem.
 
 ## 📐 Desenho da Arquitetura
