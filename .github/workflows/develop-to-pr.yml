@@ -38,7 +38,7 @@ jobs:
       #   env: 
       #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
 
-      #   run: mvn -f app-customer/pom.xml -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=TechFiap_soat-tech-challenge4-app-customer
+      #   run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=hackathom-fiap_fiapx-app-worker
 
            
   create_pull_request:  
