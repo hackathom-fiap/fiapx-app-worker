@@ -11,7 +11,7 @@
     <groupId>com.fiapx</groupId>
     <artifactId>video-processor</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>video-processor</name>
+    <name>fiapx-app-worker-processor</name>
     <description>Processador de Vídeos para Hackathon FIAP X</description>
 
     <properties>
