@@ -42,7 +42,7 @@ jobs:
       #   run: |
       #     POM_FILE=$(find . -name "pom.xml" -not -path "*/target/*" -maxdepth 2 | head -n 1)
       #     if [ -z "$POM_FILE" ]; then echo "pom.xml not found"; exit 1; fi
-      #     mvn -f "$POM_FILE" -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=TechFiap_soat-tech-challenge4-app-customer
+      #     mvn -f "$POM_FILE" -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=hackathom-fiap_fiapx-app-worker
 
 
   create_pull_request:
