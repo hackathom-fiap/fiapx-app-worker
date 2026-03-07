@@ -1,0 +1,10 @@
+spring:
+  rabbitmq:
+    host: ${RABBIT_HOST:localhost}
+    port: 5672
+    username: ${RABBIT_USER:admin}
+    password: ${RABBIT_PASSWORD:admin123}
+
+video:
+  api:
+    url: ${VIDEO_API_URL:http://localhost:8082/api/videos}
