@@ -1,18 +1,8 @@
-# 🏗️ fiapx-app-worker-processor
+# 🏗️ Solução FIAP X - Sistema de Processamento de Vídeos
 
-Esta documentação descreve a arquitetura de microsserviços orientada a eventos desenvolvida para o **Sistema de Processamento de Vídeos da FIAP X**.
+Esta documentação descreve a arquitetura completa da solução desenvolvida para o **Hackathon FIAP X**. O sistema foi projetado seguindo os princípios de microsserviços, orientação a eventos e escalabilidade em nuvem.
 
-## 🚀 O papel deste serviço (`worker-processor`)
-O **Worker Processor** é o motor de processamento assíncrono do sistema. Suas responsabilidades incluem:
-*   Atuar como *Consumer* (Consumidor), ouvindo a fila do RabbitMQ.
-*   Processar vídeos em background, escalando horizontalmente conforme o volume de tarefas.
-*   Executar a extração de frames e compactação em arquivos `.zip`.
-*   Atualizar o status final do processamento no PostgreSQL via API.
-*   Garantir resiliência: se o processamento falhar, a mensagem pode ser reprocessada.
-
----
-
-## 📐 Visão Geral da Arquitetura da Solução
+## 📐 Desenho da Arquitetura
 
 ```mermaid
 graph TD
@@ -63,8 +53,8 @@ graph TD
     Gateway -->|Roteamento| Auth
     Gateway -->|Roteamento| API
 
-    Auth -->|Valida/Cria Usuário| DB
-    Auth -->|Gerencia Sessão| Cache
+    Auth -->|"Valida/Cria Usuário"| DB
+    Auth -->|"Gerencia Sessão"| Cache
 
     API -.->|"Verifica Token JWT"| Auth
     API -->|"Salva Metadados/Status"| DB
@@ -72,7 +62,7 @@ graph TD
     API -->|"Publica Evento (Pendente)"| MQ
 
     MQ -->|"Consome Evento"| Worker
-    Worker -->|"Lê Vídeo Bruto| Storage
+    Worker -->|"Lê Vídeo Bruto"| Storage
     Worker -->|"Processa e Salva ZIP"| Storage
     Worker -->|"Atualiza Status (Concluído)"| DB
 
@@ -84,43 +74,46 @@ graph TD
     GH -.->|"Deploy (kubectl apply)"| Worker
 ```
 
-### Camada de Entrada e Roteamento
-*   **AWS API Gateway:** Ponto de entrada único para o ecossistema.
+---
 
-### Orquestração e Compute
-*   **Amazon EKS (Elastic Kubernetes Service):** Cluster gerenciado que orquestra a execução dos microsserviços. O worker é o serviço que mais se beneficia do **Horizontal Pod Autoscaling (HPA)**.
+## 🚀 Componentes da Solução
 
-### Microsserviços do Ecossistema
-*   **`fiapx-app-auth-service`**: Responsável pelo cadastro e autenticação de usuários via JWT.
-*   **`fiapx-app-video-api`**: Interface de upload e consulta de status.
-*   **`fiapx-app-worker-processor`** (este serviço): Serviço de background que consome as mensagens e processa o vídeo.
+### 1. Microsserviços
+*   **`fiapx-app-auth-service`**: Gerencia a segurança, autenticação e autorização utilizando **JWT**.
+*   **`fiapx-app-video-api`**: Interface principal para upload de vídeos e consulta de status de processamento.
+*   **`fiapx-app-worker-processor`**: Worker assíncrono que realiza o processamento pesado de vídeos (extração de imagens e compactação ZIP).
 
-### Persistência e Mensageria
-*   **RabbitMQ (Amazon MQ):** Broker de mensagens que garante a resiliência do sistema. Este worker é o principal consumidor deste serviço.
-*   **PostgreSQL (Amazon RDS):** Banco de dados relacional para persistência de dados.
-*   **Redis (Amazon ElastiCache):** Cache de alto desempenho para suporte à autenticação.
+### 2. Infraestrutura e Persistência
+*   **Amazon EKS (Kubernetes)**: Orquestração de containers com auto-scaling.
+*   **RabbitMQ**: Broker de mensageria para desacoplamento e resiliência.
+*   **PostgreSQL**: Persistência de dados relacionais e controle de status.
+*   **Redis**: Cache e gerenciamento de sessões de segurança.
+*   **Amazon S3**: Armazenamento de arquivos binários (vídeos e ZIPs resultantes).
+*   **API Gateway**: Ponto de entrada seguro com VPC Link.
 
 ---
 
-## 🔄 Fluxo Principal de Processamento
+## 🔄 Fluxo de Funcionamento
 
-1.  **🔒 Autenticação:** O usuário autentica no `auth-service`.
-2.  **📤 Upload:** O usuário envia o vídeo para a `video-api`.
-3.  **📨 Enfileiramento:** A API publica uma mensagem no RabbitMQ contendo os dados do vídeo.
-4.  **⚙️ Processamento:** Este `worker-processor` consome a mensagem e gera o arquivo ZIP final.
-5.  **✅ Finalização:** O worker atualiza o status no banco de dados para `CONCLUÍDO`.
+1.  **Autenticação**: O usuário obtém um token JWT no serviço de Auth.
+2.  **Upload**: O vídeo é enviado para a Video API, que o armazena e registra o status inicial.
+3.  **Mensageria**: Um evento é publicado no RabbitMQ para processamento assíncrono.
+4.  **Processamento**: O Worker consome a mensagem, processa o vídeo e gera o arquivo final.
+5.  **Finalização**: O status é atualizado e o usuário pode baixar o resultado.
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## 🛠️ Stack Tecnológica
 
 | Categoria | Tecnologia |
 | :--- | :--- |
-| **Linguagem / Framework** | Java 17 / Spring Boot 3.x |
-| **Cloud Provider** | AWS (Amazon Web Services) |
-| **Containers** | Docker / Kubernetes (EKS) |
+| **Linguagem** | Java 17 |
+| **Framework** | Spring Boot 3 |
+| **Cloud** | AWS |
 | **Mensageria** | RabbitMQ |
-| **Bancos de Dados** | PostgreSQL / Redis |
-| **Infraestrutura** | Terraform (IaC) |
-| **CI/CD** | GitHub Actions |
+| **Containers** | Docker / Kubernetes |
 | **Qualidade** | SonarCloud |
+| **CI/CD** | GitHub Actions |
+
+---
+*Este projeto faz parte do desafio Hackathon FIAP X - Software Architecture.*
