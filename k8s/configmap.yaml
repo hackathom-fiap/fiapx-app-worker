@@ -10,7 +10,7 @@ data:
   RABBIT_USER: "admin"
   RABBIT_SSL: "true"
   # S3 Configuration
-  S3_BUCKET_NAME: "fiapx-hackathon-videos"
+  S3_BUCKET_NAME: "fiapx-video"
   AWS_REGION: "us-east-1"
   # API URL
   VIDEO_API_URL: "http://video-api.hackathon-video-api.svc.cluster.local:8082/api/videos"
