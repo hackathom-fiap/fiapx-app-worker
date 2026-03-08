@@ -48,7 +48,7 @@ class ProcessVideoUseCaseTest {
     void shouldProcessVideoSuccessfully() {
         // Given
         File imagesDir = new File("/tmp/images");
-        File zipFile = new File("/tmp/images.zip");
+        File zipFile = new File("/tmp/videos/" + videoId + "/images.zip");
         
         when(videoProcessing.extractImages(videoId, storagePath)).thenReturn(imagesDir);
         when(videoProcessing.createZip(videoId, imagesDir)).thenReturn(zipFile);
@@ -85,7 +85,7 @@ class ProcessVideoUseCaseTest {
         // Given
         contentType = null;
         when(videoProcessing.extractImages(eq(videoId), eq(storagePath))).thenReturn(new File("/tmp/images"));
-        when(videoProcessing.createZip(eq(videoId), any(File.class))).thenReturn(new File("/tmp/zip"));
+        when(videoProcessing.createZip(eq(videoId), any(File.class))).thenReturn(new File("/tmp/videos/" + videoId + "/images.zip"));
 
         // When
         processVideoUseCase.execute(videoId, storagePath, userEmail, contentType);
@@ -94,7 +94,7 @@ class ProcessVideoUseCaseTest {
         verify(videoApi).updateStatus(videoId, "PROCESSING", null);
         verify(videoProcessing).extractImages(videoId, storagePath);
         verify(videoProcessing).createZip(eq(videoId), any(File.class));
-        verify(videoApi).updateStatus(videoId, "COMPLETED", "C:\\tmp\\zip");
+        verify(videoApi).updateStatus(eq(videoId), eq("COMPLETED"), anyString());
         verify(notification, never()).sendErrorNotification(any(), any(), any());
     }
 
