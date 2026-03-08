@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: video-processor-config
+  namespace: hackathon-video-api
+data:
+  RABBIT_HOST: "rabbitmq.hackathon-mq.svc.cluster.local"
+  RABBIT_USER: "admin"
+  VIDEO_API_URL: "http://video-api.hackathon-video-api.svc.cluster.local:8082/api/videos"

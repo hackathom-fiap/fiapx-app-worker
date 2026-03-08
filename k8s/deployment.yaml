@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: video-processor
+  namespace: hackathon-video-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: video-processor
+  template:
+    metadata:
+      labels:
+        app: video-processor
+    spec:
+      containers:
+      - name: video-processor
+        image: fiap-x-video-processor:latest
+        imagePullPolicy: IfNotPresent
+        envFrom:
+        - configMapRef:
+            name: video-processor-config
+        - secretRef:
+            name: video-processor-secret
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+        volumeMounts:
+        - name: video-storage
+          mountPath: /tmp/videos
+      volumes:
+      - name: video-storage
+        persistentVolumeClaim:
+          claimName: video-shared-pvc
