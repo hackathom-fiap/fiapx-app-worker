@@ -19,11 +19,24 @@ public class VideoProcessConsumer {
     @RabbitListener(queues = "video-process-queue")
     public void consume(Map<String, Object> message) {
         log.info("Mensagem recebida da fila: {}", message);
-        UUID videoId = UUID.fromString((String) message.get("id"));
+
+        String idStr = (String) message.get("id");
+        if (idStr == null) {
+            log.error("ID não encontrado na mensagem: {}", message);
+            return;
+        }
+
+        UUID videoId;
+        try {
+            videoId = UUID.fromString(idStr);
+        } catch (IllegalArgumentException e) {
+            log.error("UUID inválido na mensagem: {}", idStr, e);
+            return;
+        }
         String storagePath = (String) message.get("storagePath");
         String userEmail = (String) message.get("userEmail");
         String contentType = (String) message.get("contentType");
-        
+
         processVideoUseCase.execute(videoId, storagePath, userEmail, contentType);
     }
 }
