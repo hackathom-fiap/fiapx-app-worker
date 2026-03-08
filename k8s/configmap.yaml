@@ -4,6 +4,13 @@ metadata:
   name: video-processor-config
   namespace: hackathon-video-api
 data:
-  RABBIT_HOST: "rabbitmq.hackathon-mq.svc.cluster.local"
+  # RabbitMQ (Amazon MQ)
+  RABBIT_HOST: "b-da09d5c8-d2e5-41de-a71b-c14c7cb234db.mq.us-east-1.on.aws"
+  RABBIT_PORT: "5671"
   RABBIT_USER: "admin"
+  RABBIT_SSL: "true"
+  # S3 Configuration
+  S3_BUCKET_NAME: "fiapx-hackathon-videos"
+  AWS_REGION: "us-east-1"
+  # API URL
   VIDEO_API_URL: "http://video-api.hackathon-video-api.svc.cluster.local:8082/api/videos"

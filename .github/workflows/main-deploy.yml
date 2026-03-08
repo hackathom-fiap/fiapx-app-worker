@@ -150,16 +150,16 @@ jobs:
         env:
           NEW_TAG: ${{ needs.build.outputs.tag }}
         run: |
-         
-          sed -i "s/TAG/$NEW_TAG/g" infra/deployment.yml
 
-      - name: Verificar valor da variavel imagem 
+          sed -i "s/TAG/$NEW_TAG/g" k8s/deployment.yaml
+
+      - name: Verificar valor da variavel imagem
         run: |
           echo ${{ needs.build.outputs.tag }}
 
-      - name: Fazer deploy da aplicação no EKS
+      - name: Fazer deploy da aplicaÃ§Ã£o no EKS
         run: |
-          kubectl apply -f infra/namespace.yml
-          kubectl apply --validate=false -f infra
-          
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply --validate=false -f k8s
+
           echo "Deploy realizado com sucesso!"
