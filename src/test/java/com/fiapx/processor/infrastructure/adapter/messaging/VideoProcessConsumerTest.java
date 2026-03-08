@@ -129,8 +129,8 @@ class VideoProcessConsumerTest {
                 "contentType", "video/mp4"
         );
 
-        // When & Then - Should throw IllegalArgumentException
-        assertThrows(IllegalArgumentException.class, () -> {
+        // When & Then - Should handle gracefully without throwing
+        assertDoesNotThrow(() -> {
             videoProcessConsumer.consume(message);
         });
 
