@@ -13,9 +13,10 @@ spec:
       labels:
         app: video-processor
     spec:
+      serviceAccountName: worker-service-account # Para o pod usar a Role do S3
       containers:
       - name: video-processor
-        image: fiap-x-video-processor:latest
+        image: 239409137076.dkr.ecr.us-east-1.amazonaws.com/worker:TAG
         imagePullPolicy: IfNotPresent
         envFrom:
         - configMapRef:
@@ -29,10 +30,3 @@ spec:
           limits:
             cpu: "1000m"
             memory: "1Gi"
-        volumeMounts:
-        - name: video-storage
-          mountPath: /tmp/videos
-      volumes:
-      - name: video-storage
-        persistentVolumeClaim:
-          claimName: video-shared-pvc
