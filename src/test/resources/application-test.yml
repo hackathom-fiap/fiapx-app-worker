@@ -1,0 +1,10 @@
+# Configurações específicas para o perfil de teste
+spring:
+  # Desabilita o RabbitMQ nos testes ao não fornecer um host
+  rabbitmq:
+    host:
+
+video:
+  api:
+    # Fornece uma URL falsa para a propriedade não ficar vazia
+    url: http://fake-url-for-tests.com

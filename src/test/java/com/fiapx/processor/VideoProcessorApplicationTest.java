@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@EnableAutoConfiguration(exclude = {RabbitAutoConfiguration.class})
 class VideoProcessorApplicationTest {
 
     @Test
