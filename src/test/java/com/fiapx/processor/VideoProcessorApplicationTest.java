@@ -5,17 +5,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@EnableAutoConfiguration(exclude = {RabbitAutoConfiguration.class})
 class VideoProcessorApplicationTest {
-
-    @MockBean
-    private RabbitTemplate rabbitTemplate;
 
     @Test
     void contextLoads() {
