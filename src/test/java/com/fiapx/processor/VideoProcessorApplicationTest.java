@@ -5,11 +5,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.boot.test.mock.mockito.MockBean;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
 class VideoProcessorApplicationTest {
+
+    @MockBean
+    private RabbitTemplate rabbitTemplate;
 
     @Test
     void contextLoads() {
