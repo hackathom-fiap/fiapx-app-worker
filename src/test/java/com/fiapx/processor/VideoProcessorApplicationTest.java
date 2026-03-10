@@ -8,11 +8,17 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 
+import com.fiapx.processor.infrastructure.config.RabbitMqConfig;
+import org.springframework.boot.test.mock.mockito.MockBean;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
 class VideoProcessorApplicationTest {
+
+    @MockBean
+    private RabbitMqConfig rabbitMqConfig;
 
     @Test
     void contextLoads() {
