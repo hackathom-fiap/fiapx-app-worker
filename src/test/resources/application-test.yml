@@ -3,6 +3,7 @@ spring:
   # Desabilita completamente o RabbitMQ para o perfil de teste
   rabbitmq:
     mode: off
+    port: 5672 # Adiciona um valor numérico padrão para a porta
 
 video:
   api:
