@@ -21,8 +21,9 @@ spec:
         envFrom:
         - configMapRef:
             name: video-processor-config
-        - secretRef:
-            name: video-processor-secret
+        env:
+        - name: RABBIT_PASSWORD
+          value: 'V2f440#PBD-JYkom+'
         resources:
           requests:
             cpu: "200m"

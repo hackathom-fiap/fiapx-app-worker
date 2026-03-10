@@ -6,8 +6,9 @@ metadata:
 data:
   # RabbitMQ (Amazon MQ)
   RABBIT_HOST: "b-da09d5c8-d2e5-41de-a71b-c14c7cb234db.mq.us-east-1.on.aws"
+  RABBIT_PASSWORD: "V2f440#PBD-JYkom+"
   RABBIT_PORT: "5671"
-  RABBIT_USER: "admin"
+  RABBIT_USER: "appuser"
   RABBIT_SSL: "true"
   # S3 Configuration
   S3_BUCKET_NAME: "fiapx-hackathon-videos"
