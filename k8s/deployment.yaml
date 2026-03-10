@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: video-processor
-  namespace: hackathon-video-api
+  namespace: hackathon-worker
 spec:
   replicas: 1
   selector:
