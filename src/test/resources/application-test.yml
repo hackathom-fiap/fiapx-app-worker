@@ -1,8 +1,8 @@
 # Configurações específicas para o perfil de teste
 spring:
-  # Desabilita o RabbitMQ nos testes ao não fornecer um host
+  # Desabilita completamente o RabbitMQ para o perfil de teste
   rabbitmq:
-    host:
+    mode: off
 
 video:
   api:
