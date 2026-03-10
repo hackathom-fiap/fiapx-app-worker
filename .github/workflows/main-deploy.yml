@@ -67,7 +67,6 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          #role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
 
@@ -122,8 +121,10 @@ jobs:
       - name: Configurar credenciais da AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
+          #role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           #role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME_ARN }}
           role-to-assume: arn:aws:iam::239409137076:role/role-eks-fiap
+          
           aws-region: ${{ secrets.AWS_REGION }}
           audience: sts.amazonaws.com
 

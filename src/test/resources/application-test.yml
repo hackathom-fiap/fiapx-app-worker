@@ -1,0 +1,11 @@
+# Configurações específicas para o perfil de teste
+spring:
+  # Desabilita completamente o RabbitMQ para o perfil de teste
+  rabbitmq:
+    mode: off
+    port: 5672 # Adiciona um valor numérico padrão para a porta
+
+video:
+  api:
+    # Fornece uma URL falsa para a propriedade não ficar vazia
+    url: http://fake-url-for-tests.com
