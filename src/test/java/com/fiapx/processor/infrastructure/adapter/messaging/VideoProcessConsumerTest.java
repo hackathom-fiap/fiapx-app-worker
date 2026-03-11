@@ -130,8 +130,8 @@ class VideoProcessConsumerTest {
                 "contentType", "video/mp4"
         );
 
-        // When & Then - Should throw an exception for invalid UUID
-        assertThrows(IllegalArgumentException.class, () -> {
+        // When & Then - Should handle gracefully without throwing
+        assertDoesNotThrow(() -> {
             videoProcessConsumer.consume(message);
         });
 
