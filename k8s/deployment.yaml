@@ -31,10 +31,3 @@ spec:
           limits:
             cpu: "1000m"
             memory: "1Gi"
-        volumeMounts:
-        - name: video-storage
-          mountPath: /tmp/videos
-      volumes:
-      - name: video-storage
-        persistentVolumeClaim:
-          claimName: video-shared-pvc
