@@ -1,9 +1,11 @@
 spring:
   rabbitmq:
-    host: ${RABBIT_HOST:localhost}
-    port: 5672
-    username: ${RABBIT_USER:admin}
-    password: ${RABBIT_PASSWORD:admin123}
+    host: ${RABBIT_HOST}
+    port: ${RABBIT_PORT}
+    username: ${RABBIT_USER}
+    password: ${RABBIT_PASSWORD}
+    ssl:
+      enabled: true
 
 video:
   api:

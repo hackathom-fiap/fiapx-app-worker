@@ -64,7 +64,12 @@ public class ProcessVideoUseCase {
         } finally {
             // Limpa o arquivo de vídeo baixado
             if (downloadedVideo != null) {
-                downloadedVideo.delete();
+                boolean deleted = downloadedVideo.delete();
+                if (deleted) {
+                    log.debug("Arquivo temporário removido com sucesso: {}", downloadedVideo.getAbsolutePath());
+                } else {
+                    log.warn("Falha ao remover arquivo temporário: {}", downloadedVideo.getAbsolutePath());
+                }
             }
         }
     }
