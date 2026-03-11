@@ -25,7 +25,7 @@ public class FFmpegVideoProcessor implements VideoProcessingPort {
 
         // Comando FFmpeg: extrair 1 frame por segundo (-vf fps=1)
         ProcessBuilder processBuilder = new ProcessBuilder(
-                "ffmpeg",
+                "/usr/bin/ffmpeg",
                 "-i", storagePath,
                 "-vf", "fps=1",
                 outputDir.getAbsolutePath() + "/frame_%04d.jpg"
