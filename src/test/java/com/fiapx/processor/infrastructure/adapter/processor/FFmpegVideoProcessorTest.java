@@ -83,6 +83,6 @@ class FFmpegVideoProcessorTest {
         // Then
         assertTrue(outputDir.exists());
         assertTrue(outputDir.isDirectory());
-        assertTrue(output_dir.getPath().contains(videoId.toString()));
+        assertTrue(outputDir.getPath().contains(videoId.toString()));
     }
 }
