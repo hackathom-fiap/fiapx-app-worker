@@ -23,14 +23,9 @@
         <dependencies>
             <dependency>
                 <groupId>software.amazon.awssdk</groupId>
-                <artifactId>sts</artifactId>
+                <artifactId>bom</artifactId>
                 <version>2.20.100</version>
-            </dependency>
-            <dependency>
-                <groupId>software.amazon.awssdk</groupId>
-                <artifactId>ses</artifactId>
-                <version>2.20.100</version>
-            </dependency>
+                <type>pom</type>
                 <scope>import</scope>
             </dependency>
         </dependencies>
@@ -51,7 +46,7 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- AWS S3 e STS SDK -->
+        <!-- AWS S3, STS e SES SDK -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>s3</artifactId>
@@ -59,6 +54,10 @@
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>sts</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>ses</artifactId>
         </dependency>
 
         <dependency>
