@@ -120,7 +120,6 @@ class VideoProcessConsumerTest {
         );
     }
 
-    @Disabled
     @Test
     void shouldHandleInvalidUuidGracefully() {
         // Given
