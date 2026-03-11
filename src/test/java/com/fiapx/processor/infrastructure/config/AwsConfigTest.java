@@ -11,16 +11,15 @@ class AwsConfigTest {
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner();
 
     @Test
-    void s3ClientBeanShouldBeCreated() {
+    void awsBeansShouldBeCreated() {
         this.contextRunner.withUserConfiguration(AwsConfig.class)
                 .run(context -> {
-                    // Verifica se o bean S3Client existe no contexto
+                    // Verifica se os beans S3Client e SesClient existem no contexto
                     assertThat(context).hasSingleBean(S3Client.class);
+                    assertThat(context).hasSingleBean(SesClient.class);
                     
-                    // Verifica se a região foi configurada (opcional, mas bom ter)
-                    S3Client s3Client = context.getBean(S3Client.class);
-                    // A verificação da região exata é complexa, então apenas garantimos que o bean não é nulo.
-                    assertThat(s3Client).isNotNull();
+                    assertThat(context.getBean(S3Client.class)).isNotNull();
+                    assertThat(context.getBean(SesClient.class)).isNotNull();
                 });
     }
 }

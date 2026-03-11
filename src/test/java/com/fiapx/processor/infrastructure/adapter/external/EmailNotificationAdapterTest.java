@@ -1,49 +1,62 @@
 package com.fiapx.processor.infrastructure.adapter.email;
 
 import com.fiapx.processor.infrastructure.adapter.external.EmailNotificationAdapter;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
+import software.amazon.awssdk.services.ses.SesClient;
+import software.amazon.awssdk.services.ses.model.SendEmailRequest;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 class EmailNotificationAdapterTest {
 
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    private final PrintStream originalOut = System.out;
+    @Mock
+    private SesClient sesClient;
 
-    @BeforeEach
-    public void setUpStreams() {
-        // Redireciona a saída padrão (System.out) para nosso próprio stream
-        System.setOut(new PrintStream(outContent));
-    }
-
-    @AfterEach
-    public void restoreStreams() {
-        // Restaura a saída padrão original
-        System.setOut(originalOut);
-    }
+    @InjectMocks
+    private EmailNotificationAdapter notificationAdapter;
 
     @Test
-    void sendErrorNotificationShouldPrintToConsole() {
+    void sendErrorNotificationShouldCallSes() {
         // Given
-        EmailNotificationAdapter notificationAdapter = new EmailNotificationAdapter();
         String testEmail = "test@example.com";
         UUID testVideoId = UUID.randomUUID();
         String errorMessage = "Test error message";
+        ReflectionTestUtils.setField(notificationAdapter, "senderEmail", "sender@test.com");
 
         // When
         notificationAdapter.sendErrorNotification(testEmail, testVideoId, errorMessage);
 
         // Then
-        String consoleOutput = outContent.toString();
-        assertTrue(consoleOutput.contains("SIMULANDO ENVIO DE E-MAIL"));
-        assertTrue(consoleOutput.contains("Para: " + testEmail));
-        assertTrue(consoleOutput.contains("Assunto: Erro no processamento do seu vídeo"));
-        assertTrue(consoleOutput.contains("Corpo: Olá, o vídeo " + testVideoId + " falhou no processamento. Erro: " + errorMessage));
+        verify(sesClient).sendEmail(any(SendEmailRequest.class));
+    }
+
+    @Test
+    void shouldNotCallSesWhenEmailIsEmpty() {
+        // When
+        notificationAdapter.sendErrorNotification("", UUID.randomUUID(), "error");
+
+        // Then
+        verify(sesClient, never()).sendEmail(any(SendEmailRequest.class));
+    }
+
+    @Test
+    void shouldHandleSesExceptionGracefully() {
+        // Given
+        String testEmail = "test@example.com";
+        ReflectionTestUtils.setField(notificationAdapter, "senderEmail", "sender@test.com");
+        when(sesClient.sendEmail(any(SendEmailRequest.class))).thenThrow(software.amazon.awssdk.services.ses.model.SesException.builder().message("SES error").build());
+
+        // When & Then - Não deve lançar exceção para fora
+        assertDoesNotThrow(() -> {
+            notificationAdapter.sendErrorNotification(testEmail, UUID.randomUUID(), "error");
+        });
     }
 }
