@@ -46,7 +46,7 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- AWS S3 e STS SDK -->
+        <!-- AWS S3, STS e SES SDK -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>s3</artifactId>
@@ -54,6 +54,10 @@
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>sts</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>ses</artifactId>
         </dependency>
 
         <dependency>
