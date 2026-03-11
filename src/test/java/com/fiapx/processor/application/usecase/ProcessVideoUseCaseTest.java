@@ -94,4 +94,83 @@ class ProcessVideoUseCaseTest {
         verify(notification).sendErrorNotification(eq(userEmail), eq(videoId), eq(testException.getMessage()));
         verify(s3Uploader, never()).uploadFile(any(), any(), any());
     }
+
+    @Test
+    void shouldLogWarningWhenFileDeletionFails() throws Exception {
+        // Given
+        UUID videoId = UUID.randomUUID();
+        String s3Path = "s3://test-bucket/uploads/" + videoId + ".mp4";
+        String s3Key = "uploads/" + videoId + ".mp4";
+        String userEmail = "test@example.com";
+        String contentType = "video/mp4";
+
+        File mockDownloadedFile = mock(File.class);
+        File mockImagesDir = new File("/tmp/images");
+        File mockZipFile = new File("/tmp/video.zip");
+
+        when(s3Downloader.downloadFile(testBucketName, s3Key)).thenReturn(mockDownloadedFile);
+        when(mockDownloadedFile.getAbsolutePath()).thenReturn("/tmp/test-video.mp4");
+        when(videoProcessing.extractImages(videoId, "/tmp/test-video.mp4")).thenReturn(mockImagesDir);
+        when(videoProcessing.createZip(videoId, mockImagesDir)).thenReturn(mockZipFile);
+        when(mockDownloadedFile.delete()).thenReturn(false); // Simulate deletion failure
+
+        // When
+        processVideoUseCase.execute(videoId, s3Path, userEmail, contentType);
+
+        // Then
+        verify(s3Uploader).uploadFile(eq(testBucketName), eq("processed/" + videoId + ".zip"), eq(mockZipFile.getAbsolutePath()));
+        verify(videoApi).updateStatus(eq(videoId), eq("COMPLETED"), any());
+        verify(mockDownloadedFile).delete();
+        // Verify that the method completes successfully despite deletion failure
+        verify(notification, never()).sendErrorNotification(any(), any(), any());
+    }
+
+    @Test
+    void shouldLogDebugWhenFileDeletionSucceeds() throws Exception {
+        // Given
+        UUID videoId = UUID.randomUUID();
+        String s3Path = "s3://test-bucket/uploads/" + videoId + ".mp4";
+        String s3Key = "uploads/" + videoId + ".mp4";
+        String userEmail = "test@example.com";
+        String contentType = "video/mp4";
+
+        File mockDownloadedFile = mock(File.class);
+        File mockImagesDir = new File("/tmp/images");
+        File mockZipFile = new File("/tmp/video.zip");
+
+        when(s3Downloader.downloadFile(testBucketName, s3Key)).thenReturn(mockDownloadedFile);
+        when(mockDownloadedFile.getAbsolutePath()).thenReturn("/tmp/test-video.mp4");
+        when(videoProcessing.extractImages(videoId, "/tmp/test-video.mp4")).thenReturn(mockImagesDir);
+        when(videoProcessing.createZip(videoId, mockImagesDir)).thenReturn(mockZipFile);
+        when(mockDownloadedFile.delete()).thenReturn(true); // Simulate successful deletion
+
+        // When
+        processVideoUseCase.execute(videoId, s3Path, userEmail, contentType);
+
+        // Then
+        verify(s3Uploader).uploadFile(eq(testBucketName), eq("processed/" + videoId + ".zip"), eq(mockZipFile.getAbsolutePath()));
+        verify(videoApi).updateStatus(eq(videoId), eq("COMPLETED"), any());
+        verify(mockDownloadedFile).delete();
+        verify(notification, never()).sendErrorNotification(any(), any(), any());
+    }
+
+    @Test
+    void shouldHandleNullDownloadedFileInFinallyBlock() throws Exception {
+        // Given
+        UUID videoId = UUID.randomUUID();
+        String s3Path = "s3://test-bucket/uploads/" + videoId + ".mp4";
+        String s3Key = "uploads/" + videoId + ".mp4";
+        String userEmail = "test@example.com";
+        String contentType = "video/mp4";
+
+        when(s3Downloader.downloadFile(testBucketName, s3Key)).thenReturn(null);
+
+        // When
+        processVideoUseCase.execute(videoId, s3Path, userEmail, contentType);
+
+        // Then
+        verify(videoApi).updateStatus(eq(videoId), eq("ERROR"), eq(null));
+        verify(notification).sendErrorNotification(eq(userEmail), eq(videoId), any());
+        verify(s3Uploader, never()).uploadFile(any(), any(), any());
+    }
 }

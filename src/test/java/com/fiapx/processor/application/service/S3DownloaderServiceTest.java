@@ -48,8 +48,9 @@ class S3DownloaderServiceTest {
 
         // Then
         assertNotNull(downloadedFile);
-        // Verifica se o caminho do arquivo baixado contém o nome esperado
-        assertTrue(downloadedFile.getPath().contains(key));
+        // Verifica se o caminho do arquivo baixado contém o nome esperado (considerando separadores de caminho)
+        String normalizedPath = downloadedFile.getPath().replace("\\", "/");
+        assertTrue(normalizedPath.contains(key), "File path should contain the key: " + key + " but was: " + normalizedPath);
         
         verify(s3Client).getObject(any(GetObjectRequest.class), any(Path.class));
     }
