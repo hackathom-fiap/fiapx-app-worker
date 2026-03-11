@@ -110,6 +110,7 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          echo "full_image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
   Deploy-to-EKS:
     runs-on: ubuntu-latest
     needs: build
@@ -158,7 +159,7 @@ jobs:
         run: |
           echo ${{ needs.build.outputs.tag }}
 
-      - name: Fazer deploy da aplicaÃ§Ã£o no EKS
+      - name: Fazer deploy da aplicação no EKS
         run: |
           kubectl apply -f k8s/namespace.yaml
           kubectl apply --validate=false -f k8s
