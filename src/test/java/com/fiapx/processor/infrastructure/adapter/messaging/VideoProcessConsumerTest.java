@@ -120,7 +120,6 @@ class VideoProcessConsumerTest {
         );
     }
 
-    @Disabled
     @Test
     void shouldHandleInvalidUuidGracefully() {
         // Given
@@ -131,8 +130,8 @@ class VideoProcessConsumerTest {
                 "contentType", "video/mp4"
         );
 
-        // When & Then - Should handle gracefully without throwing
-        assertDoesNotThrow(() -> {
+        // When & Then - Should throw an exception for invalid UUID
+        assertThrows(IllegalArgumentException.class, () -> {
             videoProcessConsumer.consume(message);
         });
 
