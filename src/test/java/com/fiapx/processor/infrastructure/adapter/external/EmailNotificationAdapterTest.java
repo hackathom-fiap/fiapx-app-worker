@@ -1,6 +1,7 @@
 package com.fiapx.processor.infrastructure.adapter.email;
 
 import com.fiapx.processor.infrastructure.adapter.external.EmailNotificationAdapter;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -11,8 +12,9 @@ import software.amazon.awssdk.services.ses.model.SendEmailRequest;
 
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class EmailNotificationAdapterTest {
