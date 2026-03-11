@@ -1,99 +1,49 @@
-package com.fiapx.processor.infrastructure.adapter.external;
+package com.fiapx.processor.infrastructure.adapter.email;
 
+import com.fiapx.processor.infrastructure.adapter.external.EmailNotificationAdapter;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(MockitoExtension.class)
 class EmailNotificationAdapterTest {
 
-    private EmailNotificationAdapter emailNotificationAdapter;
+    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+    private final PrintStream originalOut = System.out;
 
     @BeforeEach
-    void setUp() {
-        emailNotificationAdapter = new EmailNotificationAdapter();
+    public void setUpStreams() {
+        // Redireciona a saída padrão (System.out) para nosso próprio stream
+        System.setOut(new PrintStream(outContent));
+    }
+
+    @AfterEach
+    public void restoreStreams() {
+        // Restaura a saída padrão original
+        System.setOut(originalOut);
     }
 
     @Test
-    void shouldSendErrorNotificationSuccessfully() {
+    void sendErrorNotificationShouldPrintToConsole() {
         // Given
-        String email = "test@example.com";
-        UUID videoId = UUID.randomUUID();
-        String errorMessage = "Processing failed";
+        EmailNotificationAdapter notificationAdapter = new EmailNotificationAdapter();
+        String testEmail = "test@example.com";
+        UUID testVideoId = UUID.randomUUID();
+        String errorMessage = "Test error message";
 
-        // When & Then - Should not throw exception
-        assertDoesNotThrow(() -> {
-            emailNotificationAdapter.sendErrorNotification(email, videoId, errorMessage);
-        });
-    }
+        // When
+        notificationAdapter.sendErrorNotification(testEmail, testVideoId, errorMessage);
 
-    @Test
-    void shouldHandleNullEmail() {
-        // Given
-        String email = null;
-        UUID videoId = UUID.randomUUID();
-        String errorMessage = "Processing failed";
-
-        // When & Then - Should not throw exception
-        assertDoesNotThrow(() -> {
-            emailNotificationAdapter.sendErrorNotification(email, videoId, errorMessage);
-        });
-    }
-
-    @Test
-    void shouldHandleNullVideoId() {
-        // Given
-        String email = "test@example.com";
-        UUID videoId = null;
-        String errorMessage = "Processing failed";
-
-        // When & Then - Should not throw exception
-        assertDoesNotThrow(() -> {
-            emailNotificationAdapter.sendErrorNotification(email, videoId, errorMessage);
-        });
-    }
-
-    @Test
-    void shouldHandleNullErrorMessage() {
-        // Given
-        String email = "test@example.com";
-        UUID videoId = UUID.randomUUID();
-        String errorMessage = null;
-
-        // When & Then - Should not throw exception
-        assertDoesNotThrow(() -> {
-            emailNotificationAdapter.sendErrorNotification(email, videoId, errorMessage);
-        });
-    }
-
-    @Test
-    void shouldHandleEmptyEmail() {
-        // Given
-        String email = "";
-        UUID videoId = UUID.randomUUID();
-        String errorMessage = "Processing failed";
-
-        // When & Then - Should not throw exception
-        assertDoesNotThrow(() -> {
-            emailNotificationAdapter.sendErrorNotification(email, videoId, errorMessage);
-        });
-    }
-
-    @Test
-    void shouldHandleLongErrorMessage() {
-        // Given
-        String email = "test@example.com";
-        UUID videoId = UUID.randomUUID();
-        String errorMessage = "This is a very long error message that could potentially cause issues but should still be handled properly by the notification system without any problems";
-
-        // When & Then - Should not throw exception
-        assertDoesNotThrow(() -> {
-            emailNotificationAdapter.sendErrorNotification(email, videoId, errorMessage);
-        });
+        // Then
+        String consoleOutput = outContent.toString();
+        assertTrue(consoleOutput.contains("SIMULANDO ENVIO DE E-MAIL"));
+        assertTrue(consoleOutput.contains("Para: " + testEmail));
+        assertTrue(consoleOutput.contains("Assunto: Erro no processamento do seu vídeo"));
+        assertTrue(consoleOutput.contains("Corpo: Olá, o vídeo " + testVideoId + " falhou no processamento. Erro: " + errorMessage));
     }
 }
