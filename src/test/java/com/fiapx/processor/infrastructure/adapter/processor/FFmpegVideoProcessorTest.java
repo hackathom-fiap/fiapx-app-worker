@@ -67,6 +67,28 @@ class FFmpegVideoProcessorTest {
         }
     }
 
+    @Test
+    void createZipShouldHandleUnreadableDirectory() throws IOException {
+        // Given
+        UUID videoId = UUID.randomUUID();
+        File imagesDir = tempDir.resolve("unreadable-images").toFile();
+        imagesDir.mkdir();
+        // Torna o diretório não legível para simular a falha de listFiles()
+        imagesDir.setReadable(false);
+
+        // When
+        File zipFile = videoProcessor.createZip(videoId, imagesDir);
+
+        // Then
+        assertTrue(zipFile.exists());
+        try (ZipFile zf = new ZipFile(zipFile)) {
+            assertEquals(0, zf.size()); // O zip deve ser criado vazio
+        }
+
+        // Restaura a permissão para permitir a limpeza pelo @TempDir
+        imagesDir.setReadable(true);
+    }
+
     // Nota: Testar o método extractImages que chama um processo externo (ffmpeg)
     // é complexo e geralmente requer testes de integração ou mocks de PowerMock/ProcessBuilder,
     // o que está além do escopo de um teste unitário simples.
