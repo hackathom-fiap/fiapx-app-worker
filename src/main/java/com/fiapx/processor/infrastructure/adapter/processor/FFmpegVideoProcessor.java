@@ -61,6 +61,9 @@ public class FFmpegVideoProcessor implements VideoProcessingPort {
         log.info("Iniciando criação real de ZIP para o vídeo: {}", videoId);
         File zipFile = new File("/tmp/videos/" + videoId + "/images.zip");
         
+        // Garante que o diretório pai exista
+        zipFile.getParentFile().mkdirs();
+
         try (FileOutputStream fos = new FileOutputStream(zipFile);
              ZipOutputStream zos = new ZipOutputStream(fos)) {
             
