@@ -3,6 +3,7 @@ package com.fiapx.processor.infrastructure.config;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.ses.SesClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
