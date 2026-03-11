@@ -46,7 +46,8 @@ public class EmailNotificationAdapter implements NotificationPort {
             log.info("E-mail enviado com sucesso para: {}", email);
 
         } catch (SesException e) {
-            log.error("Falha ao enviar e-mail via SES para: {}. Erro: {}", email, e.awsErrorDetails().errorMessage());
+            String errorMsg = (e.awsErrorDetails() != null) ? e.awsErrorDetails().errorMessage() : e.getMessage();
+            log.error("Falha ao enviar e-mail via SES para: {}. Erro: {}", email, errorMsg);
         }
     }
 }
