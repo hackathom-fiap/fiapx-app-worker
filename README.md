@@ -1,125 +1,145 @@
-# 🏗️ Solução FIAP X - Sistema de Processamento de Vídeos
+# Solucao FIAP X - Infraestrutura EKS e Arquitetura do Sistema
 
 ## Integrantes - Grupo 250 do Hackathon FIAP
 *   Thiago Frozzi Ramos - RM363916
 *   Denise da Silva Ferreira - RM360753
 *   Humberto Moura Feitoza - RM360753
 
+---
+## Video da apresentação do Hackathon
 
-Esta documentação descreve a arquitetura completa da solução desenvolvida para o **Hackathon FIAP X**. O sistema foi projetado seguindo os princípios de microsserviços, orientação a eventos e escalabilidade em nuvem.
+*   [Apresentação do Hackathon](https://youtu.be/mbDetKJVOo4)
 
-## 📐 Desenho da Arquitetura
+## Arquitetura do Sistema
+
+O sistema foi concebido como uma plataforma de Processamento Distribuido de Videos, utilizando uma arquitetura orientada a eventos (Event-Driven) para garantir escalabilidade e resiliencia. A solucao roda em um cluster Amazon EKS (Kubernetes) e utiliza servicos gerenciados da AWS para persistencia e mensageria.
+
+### Componentes Principais
+
+#### 1. Entrada e Seguranca (Edge & Auth)
+*   **API Gateway:** Ponto unico de entrada para todas as requisicoes externas.
+*   **Auth Service (fiapx-app-auth):** Microsservico dedicado a autenticacao e autorizacao. Utiliza JWT para trafego seguro e Redis para gestao de sessoes e performance.
+
+#### 2. Orquestracao e Upload (Core)
+*   **Video API (fiapx-app-api):** Gerencia o ciclo de vida inicial do video. Recebe o upload, armazena o binario bruto no Amazon S3, registra metadados no PostgreSQL e dispara eventos de processamento.
+
+#### 3. Processamento Assincrono (Worker)
+*   **Worker Processor (fiapx-app-worker):** O componente de "heavy lifting". Consome mensagens do RabbitMQ, baixa o video do S3, realiza o processamento (extracao de imagens/frames) e gera um arquivo compactado (ZIP) de retorno.
+
+#### 4. Camada de Dados e Mensageria
+*   **Amazon RDS (PostgreSQL):** Banco de dados relacional para metadados de videos e usuarios.
+*   **Amazon MQ (RabbitMQ):** Broker de mensagens para desacoplamento entre a API e o Worker.
+*   **Amazon S3:** Storage de objetos para videos originais e arquivos processados.
+*   **ElastiCache (Redis):** Cache de alta performance para o servico de autenticacao.
+
+---
+
+### Principais Endpoints da API
+
+| Microsservico | Metodo | Rota | Descricao |
+| :--- | :--- | :--- | :--- |
+| **Auth** | `POST` | `/api/auth/register` | Realiza o cadastro de um novo usuario. |
+| **Auth** | `POST` | `/api/auth/login` | Autentica o usuario e retorna o token JWT. |
+| **Video API** | `POST` | `/api/videos/upload` | Recebe um ou mais videos para processamento. |
+| **Video API** | `GET` | `/api/videos/status` | Lista o status de todos os videos do usuario logado. |
+| **Video API** | `POST` | `/api/videos/{id}/status` | Endpoint interno para atualizacao de status (usado pelo Worker). |
+
+## SonarQube
+
+*   [SonarQube](https://sonarcloud.io/projects?sort=name)
+*   Cobertura de Testes:
+![Cobertura de Testes](Cobertura-Sonar.png)
+
+## Repositorios do Hackathon
+
+### Infraestrutura
+*   [Infra EKS (Kubernetes)](https://github.com/hackathom-fiap/fiapx-infra-eks)
+*   [Infra Fila (AmazonMQ)](https://github.com/hackathom-fiap/fiapx-infra-amazonmq)
+*   [Infra Database (PostgreSQL)](https://github.com/hackathom-fiap/fiapx-infra-postgres)
+*   [Infra Redis](https://github.com/hackathom-fiap/fiapx-infra-redis)
+*   [Infra IAM Roles](https://github.com/hackathom-fiap/fiapx-infra-roles)
+
+### Microserviços (APIs)
+*   [App Auth](https://github.com/hackathom-fiap/fiapx-app-auth)
+*   [App Api](https://github.com/hackathom-fiap/fiapx-app-api)
+*   [App Worker](https://github.com/hackathom-fiap/fiapx-app-worker)
+
+---
+
+### Diagrama de Arquitetura
 
 ```mermaid
 graph TD
-    %% Cores e Estilos
+    %% Definicao de Estilos
     classDef client fill:#f9f9f9,stroke:#333,stroke-width:2px;
-    classDef aws fill:#FF9900,stroke:#232F3E,stroke-width:2px,color:#232F3E,font-weight:bold;
-    classDef k8s fill:#326ce5,stroke:#fff,stroke-width:2px,color:#fff,font-weight:bold;
-    classDef microservice fill:#6DB33F,stroke:#fff,stroke-width:2px,color:#fff;
-    classDef database fill:#336791,stroke:#fff,stroke-width:2px,color:#fff;
-    classDef queue fill:#FF6600,stroke:#fff,stroke-width:2px,color:#fff;
-    classDef cicd fill:#2088FF,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef aws fill:#FF9900,stroke:#232F3E,stroke-width:2px,color:white;
+    classDef k8s fill:#326ce5,stroke:#fff,stroke-width:2px,color:white;
+    classDef db fill:#336791,stroke:#fff,stroke-width:2px,color:white;
+    classDef queue fill:#FF6600,stroke:#fff,stroke-width:2px,color:white;
 
-    %% Atores e Clientes
-    User((🧑‍💻 Usuário / Investidor)):::client
+    %% Atores
+    User((Usuario))
 
-    %% Infraestrutura AWS
-    subgraph "☁️ Cloud Provider (AWS)"
-        Gateway[🚪 API Gateway]:::aws
+    subgraph AWS [AWS Cloud]
         
-        subgraph "🔒 VPC (Rede Privada)"
-            
-            subgraph "☸️ Amazon EKS (Kubernetes)"
-                direction TB
-                Auth[🔐 fiapx-app-auth-service]:::microservice
-                API[📹 fiapx-app-video-api]:::microservice
-                Worker[⚙️ fiapx-app-worker-processor]:::microservice
+        Gateway[API Gateway]:::aws
+        
+        subgraph EKS [EKS Cluster - Kubernetes]
+            direction TB
+            Auth[Auth Service]:::k8s
+            API[Video API]:::k8s
+            Worker[Worker Processor]:::k8s
+        end
+
+        subgraph Storage [Camada de Persistencia]
+            S3[(Amazon S3)]:::aws
+            subgraph RDS [Amazon RDS - PostgreSQL]
+                DB_A[(auth_db)]:::db
+                DB_API[(api-db)]:::db
             end
-            
-            subgraph "🗄️ Dados e Mensageria"
-                MQ[(🐇 RabbitMQ / Amazon MQ)]:::queue
-                DB[(🐘 PostgreSQL / Amazon RDS)]:::database
-                Cache[(🔴 Redis / ElastiCache)]:::database
-            end
-            
-            Storage[(🪣 Amazon S3 - Arquivos)]:::aws
+            Redis[(Redis)]:::db
+        end
+
+        subgraph Messaging [Mensageria]
+            MQ[(RabbitMQ)]:::queue
         end
     end
 
-    %% Pipeline CI/CD
-    subgraph "🚀 Pipeline CI/CD"
-        GH[🐙 GitHub Actions]:::cicd
-        Sonar[🔍 SonarCloud]:::cicd
-        ECR[📦 Amazon ECR]:::aws
-    end
+    %% Fluxos
+    User -->|1. Login / Upload| Gateway
+    Gateway --> Auth
+    Gateway --> API
 
-    %% Relacionamentos e Fluxos
-    User -->|1. Login / Upload REST| Gateway
-    Gateway -->|Roteamento| Auth
-    Gateway -->|Roteamento| API
+    Auth -->|Valida Token| Redis
+    Auth -->|Valida/Cria Usuario| DB_A
+    API -->|2. Salva Video Bruto| S3
+    API -->|3. Registra Metadados| DB_API
+    API -->|4. Notifica Upload| MQ
 
-    Auth -->|"Valida/Cria Usuário"| DB
-    Auth -->|"Gerencia Sessão"| Cache
-
-    API -.->|"Verifica Token JWT"| Auth
-    API -->|"Salva Metadados/Status"| DB
-    API -->|"Upload do Vídeo Bruto"| Storage
-    API -->|"Publica Evento (Pendente)"| MQ
-
-    MQ -->|"Consome Evento"| Worker
-    Worker -->|"Lê Vídeo Bruto"| Storage
-    Worker -->|"Processa e Salva ZIP"| Storage
-    Worker -->|"Atualiza Status (Concluído)"| DB
-
-    %% Relacionamentos CI/CD
-    GH -.->|"Analisa Código"| Sonar
-    GH -.->|"Gera Imagem Docker"| ECR
-    GH -.->|"Deploy (kubectl apply)"| Auth
-    GH -.->|"Deploy (kubectl apply)"| API
-    GH -.->|"Deploy (kubectl apply)"| Worker
+    MQ -->|5. Consome Evento| Worker
+    Worker -->|6. Processa Video| S3
+    Worker -->|7. Atualiza Status via HTTP| API
+    API -->|8. Persiste Status| DB_API
 ```
 
 ---
 
-## 🚀 Componentes da Solução
+## Stack Tecnologica
 
-### 1. Microsserviços
-*   **`fiapx-app-auth-service`**: Gerencia a segurança, autenticação e autorização utilizando **JWT**.
-*   **`fiapx-app-video-api`**: Interface principal para upload de vídeos e consulta de status de processamento.
-*   **`fiapx-app-worker-processor`**: Worker assíncrono que realiza o processamento pesado de vídeos (extração de imagens e compactação ZIP).
-
-### 2. Infraestrutura e Persistência
-*   **Amazon EKS (Kubernetes)**: Orquestração de containers com auto-scaling.
-*   **RabbitMQ**: Broker de mensageria para desacoplamento e resiliência.
-*   **PostgreSQL**: Persistência de dados relacionais e controle de status.
-*   **Redis**: Cache e gerenciamento de sessões de segurança.
-*   **Amazon S3**: Armazenamento de arquivos binários (vídeos e ZIPs resultantes).
-*   **API Gateway**: Ponto de entrada seguro com VPC Link.
+*   **Linguagem:** Java 17
+*   **Framework:** Spring Boot 3.2.2
+*   **Seguranca:** Spring Security + JWT
+*   **Infraestrutura:** Terraform (IaC), AWS EKS, Docker
+*   **Mensageria:** RabbitMQ (Protocolo AMQP)
+*   **Qualidade:** JaCoCo e SonarCloud
 
 ---
 
-## 🔄 Fluxo de Funcionamento
+## Diferenciais da Solucao (Hackathon)
 
-1.  **Autenticação**: O usuário obtém um token JWT no serviço de Auth.
-2.  **Upload**: O vídeo é enviado para a Video API, que o armazena e registra o status inicial.
-3.  **Mensageria**: Um evento é publicado no RabbitMQ para processamento assíncrono.
-4.  **Processamento**: O Worker consome a mensagem, processa o vídeo e gera o arquivo final.
-5.  **Finalização**: O status é atualizado e o usuário pode baixar o resultado.
-
----
-
-## 🛠️ Stack Tecnológica
-
-| Categoria | Tecnologia |
-| :--- | :--- |
-| **Linguagem** | Java 17 |
-| **Framework** | Spring Boot 3 |
-| **Cloud** | AWS |
-| **Mensageria** | RabbitMQ |
-| **Containers** | Docker / Kubernetes |
-| **Qualidade** | SonarCloud |
-| **CI/CD** | GitHub Actions |
+1.  **Escalabilidade Horizontal:** O Worker Processor pode ser escalado independentemente da API (usando K8s HPA) conforme a fila do RabbitMQ cresce.
+2.  **Arquitetura Hexagonal:** O uso de Ports and Adapters na Video API permite trocar o banco de dados ou o provider de nuvem com minimo impacto.
+3.  **Seguranca Stateless:** Toda a comunicacao e protegida por JWT, eliminando a necessidade de manter estado de sessao no servidor da API.
+4.  **Resiliencia:** Se o Worker falhar, a mensagem volta para a fila, garantindo que nenhum video deixe de ser processado.
 
 ---
-*Este projeto faz parte do desafio Hackathon FIAP X - Software Architecture.*
